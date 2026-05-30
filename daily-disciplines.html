@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Daily Disciplines" />
+  <title>Daily Disciplines</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      min-height: 100vh;
+      background: #FAF8F5;
+      color: #1C1A17;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 420px;
+      padding: 52px 22px 80px;
+    }
+
+    /* Header */
+    .date-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: #A09880;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 300;
+      line-height: 1.1;
+      color: #1C1A17;
+    }
+    .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-style: italic;
+      color: #8C8270;
+      margin-top: 6px;
+    }
+
+    /* Progress card */
+    .progress-card {
+      margin: 28px 0 26px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 16px 18px;
+      border: 1px solid #EAE6DF;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .progress-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: #A09880;
+      text-transform: uppercase;
+    }
+    .progress-count {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1C1A17;
+    }
+    .progress-count span {
+      color: #C0B8A8;
+      font-size: 16px;
+      font-weight: 300;
+    }
+    .progress-bar {
+      height: 4px;
+      background: #E8E4DE;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #A07830, #4A6096);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .streak {
+      margin-top: 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: #A07830;
+      letter-spacing: 0.1em;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #E4E0D8;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      color: #A09880;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 6px 14px;
+      transition: color 0.2s;
+    }
+    .tab.active {
+      color: #1C1A17;
+      border-bottom-color: #A07830;
+    }
+
+    /* Category cards */
+    .category-card {
+      border-radius: 12px;
+      padding: 4px 6px 8px;
+      margin-bottom: 16px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 8px 6px;
+    }
+    .category-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* Habit items */
+    .habit-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .habit-item:active {
+      background: rgba(0,0,0,0.05);
+    }
+    .habit-item.checked { opacity: 0.45; }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid #C8C2B8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .habit-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: #1C1A17;
+      transition: all 0.2s;
+    }
+    .habit-item.checked .habit-label {
+      text-decoration: line-through;
+      text-decoration-color: #B0A898;
+      font-weight: 300;
+    }
+
+    /* Week view */
+    .week-bars {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .week-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .bar-count {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: #A09880;
+    }
+    .bar-count.today { color: #A07830; }
+    .bar-wrap {
+      width: 28px;
+      height: 80px;
+      background: #EDE9E3;
+      border-radius: 14px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+    .bar-fill {
+      width: 100%;
+      border-radius: 14px;
+      transition: height 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .bar-day {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: #A09880;
+    }
+    .bar-day.today { color: #1C1A17; font-weight: 700; }
+
+    .week-summary {
+      margin-top: 24px;
+      background: #FFFFFF;
+      border-radius: 10px;
+      border: 1px solid #EAE6DF;
+      overflow: hidden;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 16px;
+      border-bottom: 1px solid #EAE6DF;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-name {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      color: #1C1A17;
+    }
+    .summary-pct {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+    }
+
+    .footer {
+      margin-top: 48px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: #C0B8A8;
+      text-align: center;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="date-label" id="dateLabel"></div>
+  <h1>Daily Disciplines</h1>
+  <div class="subtitle" id="subtitle"></div>
+
+  <div class="progress-card">
+    <div class="progress-header">
+      <span class="progress-label">Today's Progress</span>
+      <span class="progress-count" id="progressCount"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="streak hidden" id="streakEl"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabToday" onclick="setView('today')">Today</button>
+    <button class="tab" id="tabWeek" onclick="setView('week')">This Week</button>
+  </div>
+
+  <div id="viewToday"></div>
+  <div id="viewWeek" class="hidden"></div>
+
+  <div class="footer">Small disciplines, compounded daily.</div>
+</div>
+
+<script>
+const HABITS = [
+  {
+    category: "Spiritual", icon: "✦", color: "#A07830", bg: "#FDF6E8",
+    items: [
+      { id: "devotional", label: "Daily Devotional" },
+      { id: "bible", label: "Read a Chapter" },
+      { id: "pray", label: "Pray" },
+    ]
+  },
+  {
+    category: "Body", icon: "◈", color: "#3A7D5E", bg: "#EDF7F2",
+    items: [
+      { id: "walk", label: "Walk the Dog" },
+    ]
+  },
+  {
+    category: "Mind", icon: "◎", color: "#4A6096", bg: "#EEF1F9",
+    items: [
+      { id: "think", label: "Think & Reflect" },
+      { id: "journal", label: "Journal" },
+      { id: "read", label: "Read a Book" },
+    ]
+  },
+];
+
+const ALL_IDS = HABITS.flatMap(c => c.items.map(i => i.id));
+
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0];
+}
+function getDateKey(daysAgo) {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().split("T")[0];
+}
+function loadData() {
+  try { return JSON.parse(localStorage.getItem("habitData") || "{}"); }
+  catch { return {}; }
+}
+function saveData(d) {
+  try { localStorage.setItem("habitData", JSON.stringify(d)); } catch {}
+}
+
+let data = loadData();
+let currentView = "today";
+
+function toggle(id) {
+  const key = getTodayKey();
+  data[key] = data[key] || {};
+  data[key][id] = !data[key][id];
+  saveData(data);
+  render();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById("tabToday").className = "tab" + (v === "today" ? " active" : "");
+  document.getElementById("tabWeek").className = "tab" + (v === "week" ? " active" : "");
+  document.getElementById("viewToday").className = v === "today" ? "" : "hidden";
+  document.getElementById("viewWeek").className = v === "week" ? "" : "hidden";
+}
+
+function render() {
+  const todayKey = getTodayKey();
+  const todayChecked = data[todayKey] || {};
+  const total = ALL_IDS.length;
+  const done = ALL_IDS.filter(id => todayChecked[id]).length;
+  const progress = total > 0 ? (done / total) * 100 : 0;
+
+  // Date
+  document.getElementById("dateLabel").textContent =
+    new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+  // Subtitle
+  const msg = done === 0 ? "Let's get started."
+    : done < total ? "Keep going, you're doing great."
+    : "Every habit complete today. 🎉";
+  document.getElementById("subtitle").textContent = msg;
+
+  // Progress
+  document.getElementById("progressCount").innerHTML =
+    done + '<span>/' + total + '</span>';
+  document.getElementById("progressFill").style.width = progress + "%";
+
+  // Streak
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const k = getDateKey(i);
+    const dd = data[k] || {};
+    if (ALL_IDS.filter(id => dd[id]).length === total) streak++;
+    else if (i > 0) break;
+  }
+  const streakEl = document.getElementById("streakEl");
+  if (streak > 0) {
+    streakEl.textContent = "◆ " + streak + "-day streak";
+    streakEl.className = "streak";
+  } else {
+    streakEl.className = "streak hidden";
+  }
+
+  // Today view
+  const todayEl = document.getElementById("viewToday");
+  todayEl.innerHTML = HABITS.map(cat => `
+    <div class="category-card" style="background:${cat.bg}">
+      <div class="category-header">
+        <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
+        <span class="category-label" style="color:${cat.color}">${cat.category}</span>
+      </div>
+      ${cat.items.map(item => {
+        const checked = !!todayChecked[item.id];
+        return `
+          <div class="habit-item ${checked ? 'checked' : ''}" onclick="toggle('${item.id}')">
+            <div class="checkbox" style="${checked
+              ? `background:${cat.color};border-color:${cat.color}`
+              : `border-color:${cat.color}60`
+            }">${checked ? '✓' : ''}</div>
+            <span class="habit-label">${item.label}</span>
+          </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  // Week view
+  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const weekDays = Array.from({length:7}, (_,i) => {
+    const key = getDateKey(6 - i);
+    const dd = data[key] || {};
+    const d2 = new Date(); d2.setDate(d2.getDate() - (6 - i));
+    return {
+      key,
+      done: ALL_IDS.filter(id => dd[id]).length,
+      total,
+      dayName: dayNames[d2.getDay()],
+      isToday: key === todayKey
+    };
+  });
+
+  const barsHtml = weekDays.map(day => {
+    const pct = day.total > 0 ? day.done / day.total : 0;
+    const h = Math.round(pct * 80);
+    const color = pct === 1 ? "#A07830" : pct > 0.5 ? "#3A7D5E" : pct > 0 ? "#4A6096" : "#D8D4CC";
+    return `
+      <div class="week-bar">
+        <div class="bar-count ${day.isToday ? 'today' : ''}">${day.done}/${day.total}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="height:${h}px;background:${color}"></div></div>
+        <div class="bar-day ${day.isToday ? 'today' : ''}">${day.dayName}</div>
+      </div>`;
+  }).join('');
+
+  const summaryHtml = HABITS.map((cat, i) => {
+    const wd = weekDays.reduce((acc, day) => {
+      const dd = data[day.key] || {};
+      return acc + cat.items.filter(it => dd[it.id]).length;
+    }, 0);
+    const wt = cat.items.length * 7;
+    const pct = Math.round((wd / wt) * 100);
+    return `
+      <div class="summary-row">
+        <div class="summary-name">
+          <span style="color:${cat.color}">${cat.icon}</span>${cat.category}
+        </div>
+        <span class="summary-pct" style="color:${cat.color}">${pct}%</span>
+      </div>`;
+  }).join('');
+
+  document.getElementById("viewWeek").innerHTML = `
+    <div class="week-bars">${barsHtml}</div>
+    <div class="week-summary">${summaryHtml}</div>`;
+}
+
+render();
+</script>
+</body>
+</html>
