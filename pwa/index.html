@@ -277,6 +277,92 @@
       text-align: center;
     }
 
+    /* Edit mode */
+    .edit-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 6px;
+    }
+    .edit-toggle {
+      background: none;
+      border: none;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #A09880;
+      cursor: pointer;
+      padding: 6px 6px;
+      transition: color 0.2s;
+    }
+    .edit-toggle.active { color: #A07830; }
+
+    .habit-edit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 6px 14px;
+    }
+    .habit-input {
+      flex: 1;
+      min-width: 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: #1C1A17;
+      background: #FFFFFF;
+      border: 1px solid #E4E0D8;
+      border-radius: 8px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .habit-input:focus { border-color: #C0B8A8; }
+    .habit-delete {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      color: #C0473F;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .habit-delete:active { background: rgba(192,71,63,0.12); }
+
+    .add-habit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: calc(100% - 16px);
+      margin: 6px 8px 2px;
+      padding: 9px 12px;
+      border: 1px dashed #D8D2C8;
+      border-radius: 8px;
+      background: none;
+      cursor: pointer;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: #8C8270;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .add-habit:active { border-color: #B8B0A0; color: #6C6250; }
+
+    .empty-state {
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: #A09880;
+      padding: 28px 0 8px;
+      line-height: 1.6;
+    }
+
     .hidden { display: none; }
   </style>
 </head>
@@ -307,32 +393,42 @@
 </div>
 
 <script>
-const HABITS = [
-  {
-    category: "Spiritual", icon: "✦", color: "#A07830", bg: "#FDF6E8",
-    items: [
-      { id: "devotional", label: "Daily Devotional" },
-      { id: "bible",      label: "Read a Chapter"  },
-      { id: "pray",       label: "Pray"            },
-    ]
-  },
-  {
-    category: "Body", icon: "◈", color: "#3A7D5E", bg: "#EDF7F2",
-    items: [
-      { id: "walk", label: "Walk the Dog" },
-    ]
-  },
-  {
-    category: "Mind", icon: "◎", color: "#4A6096", bg: "#EEF1F9",
-    items: [
-      { id: "think",   label: "Think & Reflect" },
-      { id: "journal", label: "Journal"         },
-      { id: "read",    label: "Read a Book"     },
-    ]
-  },
+// Categories are fixed (label, icon, color). Habits live inside them and are editable.
+const CATEGORIES = [
+  { id: "spiritual", label: "Spiritual", icon: "✦", color: "#A07830", bg: "#FDF6E8" },
+  { id: "body",      label: "Body",      icon: "◈", color: "#3A7D5E", bg: "#EDF7F2" },
+  { id: "mind",      label: "Mind",      icon: "◎", color: "#4A6096", bg: "#EEF1F9" },
 ];
 
-const ALL_IDS = HABITS.flatMap(c => c.items.map(i => i.id));
+// Seed habit set, used only the first time the app runs (before any edits).
+const DEFAULT_HABITS = [
+  { id: "devotional", label: "Daily Devotional", cat: "spiritual" },
+  { id: "bible",      label: "Read a Chapter",   cat: "spiritual" },
+  { id: "pray",       label: "Pray",             cat: "spiritual" },
+  { id: "walk",       label: "Walk the Dog",     cat: "body"      },
+  { id: "think",      label: "Think & Reflect",  cat: "mind"      },
+  { id: "journal",    label: "Journal",          cat: "mind"      },
+  { id: "read",       label: "Read a Book",      cat: "mind"      },
+];
+
+function loadHabits() {
+  const raw = localStorage.getItem("habitConfig");
+  if (raw === null) return DEFAULT_HABITS.map(h => ({ ...h }));
+  try {
+    const stored = JSON.parse(raw);
+    if (Array.isArray(stored)) {
+      return stored
+        .filter(h => h && h.id && CATEGORIES.some(c => c.id === h.cat))
+        .map(h => ({ id: String(h.id), label: String(h.label || ""), cat: h.cat }));
+    }
+  } catch {}
+  return DEFAULT_HABITS.map(h => ({ ...h }));
+}
+function saveHabits() {
+  try { localStorage.setItem("habitConfig", JSON.stringify(habits)); } catch {}
+}
+
+let habits = loadHabits();
 
 // Use local time for date keys (not UTC)
 function dateKey(d) {
@@ -358,6 +454,7 @@ function saveData(d) {
 let data = loadData();
 
 function toggle(id) {
+  if (editMode) return;
   const key = getTodayKey();
   data[key] = data[key] || {};
   data[key][id] = !data[key][id];
@@ -365,7 +462,54 @@ function toggle(id) {
   render();
 }
 
+// ---- Habit editing ----
+let editMode = false;
+let focusId = null;
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function newHabitId() {
+  return "h" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function setEdit(on) {
+  if (!on) {
+    // Drop any half-added habits that were never named.
+    habits = habits.filter(h => h.label.trim() !== "");
+    saveHabits();
+  }
+  editMode = on;
+  render();
+}
+
+function addHabit(catId) {
+  const id = newHabitId();
+  habits.push({ id, label: "", cat: catId });
+  saveHabits();
+  focusId = id;            // focus the new field after the re-render
+  render();
+}
+
+function renameHabit(id, value) {
+  const h = habits.find(x => x.id === id);
+  if (h) { h.label = value; saveHabits(); }
+  // No render() here — re-rendering would steal focus from the input mid-type.
+}
+
+function deleteHabit(id) {
+  const h = habits.find(x => x.id === id);
+  const name = h && h.label.trim() ? h.label : "this habit";
+  if (!confirm('Delete "' + name + '"? Your past history is kept.')) return;
+  habits = habits.filter(x => x.id !== id);
+  saveHabits();
+  render();
+}
+
 function setView(v) {
+  if (v === "week" && editMode) setEdit(false);  // leave edit mode when switching away
   document.getElementById("tabToday").className = "tab" + (v === "today" ? " active" : "");
   document.getElementById("tabWeek").className  = "tab" + (v === "week"  ? " active" : "");
   document.getElementById("viewToday").className = v === "today" ? "" : "hidden";
@@ -373,6 +517,7 @@ function setView(v) {
 }
 
 function render() {
+  const ALL_IDS      = habits.map(h => h.id);
   const todayKey     = getTodayKey();
   const todayChecked = data[todayKey] || {};
   const total        = ALL_IDS.length;
@@ -391,33 +536,78 @@ function render() {
 
   // Streak — today partial does not break streak
   let streak = 0;
-  for (let i = 0; i < 365; i++) {
-    const dd = data[getDateKey(i)] || {};
-    if (ALL_IDS.filter(id => dd[id]).length === total) streak++;
-    else if (i > 0) break;
+  if (total > 0) {
+    for (let i = 0; i < 365; i++) {
+      const dd = data[getDateKey(i)] || {};
+      if (ALL_IDS.filter(id => dd[id]).length === total) streak++;
+      else if (i > 0) break;
+    }
   }
   const streakEl = document.getElementById("streakEl");
   streakEl.textContent = "◆ " + streak + "-day streak";
   streakEl.className   = streak > 0 ? "streak" : "streak hidden";
 
   // Today view
-  document.getElementById("viewToday").innerHTML = HABITS.map(cat => `
-    <div class="category-card" style="background:${cat.bg}">
-      <div class="category-header">
-        <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
-        <span class="category-label" style="color:${cat.color}">${cat.category}</span>
-      </div>
-      ${cat.items.map(item => {
-        const checked = !!todayChecked[item.id];
-        return `
-          <div class="habit-item${checked ? ' checked' : ''}" onclick="toggle('${item.id}')">
-            <div class="checkbox" style="${checked
-              ? `background:${cat.color};border-color:${cat.color}`
-              : `border-color:${cat.color}60`}">${checked ? '✓' : ''}</div>
-            <span class="habit-label">${item.label}</span>
-          </div>`;
-      }).join('')}
-    </div>`).join('');
+  const editBar =
+    '<div class="edit-bar">' +
+      '<button class="edit-toggle' + (editMode ? ' active' : '') +
+        '" onclick="setEdit(' + (!editMode) + ')">' +
+        (editMode ? '✓ Done' : '✎ Edit') +
+      '</button>' +
+    '</div>';
+
+  let bodyHtml;
+  if (editMode) {
+    // Edit mode: rename fields, delete buttons, and an add row per category.
+    bodyHtml = CATEGORIES.map(cat => `
+      <div class="category-card" style="background:${cat.bg}">
+        <div class="category-header">
+          <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
+          <span class="category-label" style="color:${cat.color}">${cat.label}</span>
+        </div>
+        ${habits.filter(h => h.cat === cat.id).map(item => `
+          <div class="habit-edit">
+            <input class="habit-input" type="text" data-id="${item.id}"
+                   value="${escapeHtml(item.label)}" placeholder="Habit name"
+                   oninput="renameHabit('${item.id}', this.value)" />
+            <button class="habit-delete" onclick="deleteHabit('${item.id}')" aria-label="Delete habit">✕</button>
+          </div>`).join('')}
+        <button class="add-habit" onclick="addHabit('${cat.id}')">
+          <span style="color:${cat.color};font-style:normal;font-weight:700">+</span> Add a habit
+        </button>
+      </div>`).join('');
+  } else {
+    // Normal mode: tap-to-toggle. Empty categories are hidden.
+    const visibleCats = CATEGORIES.filter(cat => habits.some(h => h.cat === cat.id));
+    bodyHtml = visibleCats.length === 0
+      ? '<div class="empty-state">No habits yet.<br>Tap <b>✎ Edit</b> to add some.</div>'
+      : visibleCats.map(cat => `
+        <div class="category-card" style="background:${cat.bg}">
+          <div class="category-header">
+            <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
+            <span class="category-label" style="color:${cat.color}">${cat.label}</span>
+          </div>
+          ${habits.filter(h => h.cat === cat.id).map(item => {
+            const checked = !!todayChecked[item.id];
+            return `
+              <div class="habit-item${checked ? ' checked' : ''}" onclick="toggle('${item.id}')">
+                <div class="checkbox" style="${checked
+                  ? `background:${cat.color};border-color:${cat.color}`
+                  : `border-color:${cat.color}60`}">${checked ? '✓' : ''}</div>
+                <span class="habit-label">${escapeHtml(item.label)}</span>
+              </div>`;
+          }).join('')}
+        </div>`).join('');
+  }
+
+  document.getElementById("viewToday").innerHTML = editBar + bodyHtml;
+
+  // After adding a habit, focus its (empty) name field.
+  if (focusId) {
+    const inp = document.querySelector('.habit-input[data-id="' + focusId + '"]');
+    if (inp) inp.focus();
+    focusId = null;
+  }
 
   // Week view
   const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -441,12 +631,14 @@ function render() {
       </div>`;
   }).join('');
 
-  const summaryHtml = HABITS.map(cat => {
-    const wd  = weekDays.reduce((acc, day) => acc + cat.items.filter(it => (data[day.key]||{})[it.id]).length, 0);
-    const pct = Math.round((wd / (cat.items.length * 7)) * 100);
+  const summaryHtml = CATEGORIES.map(cat => {
+    const items = habits.filter(h => h.cat === cat.id);
+    if (items.length === 0) return '';
+    const wd  = weekDays.reduce((acc, day) => acc + items.filter(it => (data[day.key]||{})[it.id]).length, 0);
+    const pct = Math.round((wd / (items.length * 7)) * 100);
     return `
       <div class="summary-row">
-        <div class="summary-name"><span style="color:${cat.color}">${cat.icon}</span>${cat.category}</div>
+        <div class="summary-name"><span style="color:${cat.color}">${cat.icon}</span>${cat.label}</div>
         <span class="summary-pct" style="color:${cat.color}">${pct}%</span>
       </div>`;
   }).join('');
