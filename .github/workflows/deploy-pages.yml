@@ -28,8 +28,6 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       # Publish only the PWA folder as the site root, so its relative
       # paths (manifest.json, sw.js, icons/) resolve under /dailyHabit/.
