@@ -365,9 +365,51 @@
     }
 
     .hidden { display: none; }
+
+    /* Splash screen — full-bleed launch image, tap anywhere to dismiss */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: #F6F0E4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+    #splash.hide { opacity: 0; pointer-events: none; }
+    #splash img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+    .splash-hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: calc(28px + env(safe-area-inset-bottom));
+      text-align: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #A89D86;
+      pointer-events: none;
+      animation: splashPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes splashPulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.8; } }
   </style>
 </head>
 <body>
+<div id="splash" role="button" tabindex="0" aria-label="Daily Better — Small Habits, Big Change. Tap to begin.">
+  <img src="splash.png" alt="Daily Better — Small Habits, Big Change" />
+  <div class="splash-hint">Tap anywhere to begin</div>
+</div>
 <div id="app">
   <div class="date-label" id="dateLabel"></div>
   <h1>Daily Disciplines</h1>
@@ -655,6 +697,24 @@ render();
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
   }
+</script>
+
+<script>
+  // Splash: dismiss on first tap / click / key press, then remove from the DOM.
+  (function () {
+    var splash = document.getElementById('splash');
+    if (!splash) return;
+    function dismiss() {
+      splash.classList.add('hide');
+      document.removeEventListener('pointerdown', dismiss);
+      document.removeEventListener('keydown', dismiss);
+      setTimeout(function () {
+        if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+      }, 550);
+    }
+    document.addEventListener('pointerdown', dismiss, { once: true });
+    document.addEventListener('keydown', dismiss, { once: true });
+  })();
 </script>
 </body>
 </html>
