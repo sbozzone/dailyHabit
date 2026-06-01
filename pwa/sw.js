@@ -1,5 +1,5 @@
-const CACHE = 'daily-disciplines-v4';
-const ASSETS = ['./', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+const CACHE = 'daily-disciplines-v5';
+const ASSETS = ['./', './manifest.json', './splash.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
