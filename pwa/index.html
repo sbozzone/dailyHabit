@@ -915,8 +915,9 @@ if (window.matchMedia) {
 }
 
 // ---- Celebration ----
+// Runs regardless of the system Reduce Motion setting, by user request —
+// completing the day is a deliberate action, not ambient motion.
 function celebrate() {
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   if (document.getElementById("confetti")) return;
   const cv = document.createElement("canvas");
   cv.id = "confetti";
