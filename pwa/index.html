@@ -661,6 +661,11 @@
     #confetti {
       position: fixed;
       inset: 0;
+      /* Explicit display size: without this the canvas renders at its
+         device-pixel buffer size (viewport × dpr) and the confetti is
+         drawn offscreen on high-density phone screens. */
+      width: 100%;
+      height: 100%;
       z-index: 900;
       pointer-events: none;
     }
