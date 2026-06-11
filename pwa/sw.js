@@ -1,4 +1,4 @@
-const CACHE = 'daily-disciplines-v5';
+const CACHE = 'daily-disciplines-v6';
 const ASSETS = ['./', './manifest.json', './splash.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
