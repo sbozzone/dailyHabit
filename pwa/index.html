@@ -846,8 +846,46 @@ function toggle(id) {
   const nowDone = habits.length > 0 && habits.every(h => data[key][h.id]);
   if (nowDone && !wasDone) {
     if (navigator.vibrate) navigator.vibrate([20, 60, 30]);
+    playFanfare();
     celebrate();
   }
+}
+
+// ---- Fanfare ----
+// A short rising "do–mi–sol–do" arpeggio, synthesized so it works offline.
+let audioCtx = null;
+function playFanfare() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t0 = audioCtx.currentTime + 0.02;
+    const master = audioCtx.createGain();
+    master.gain.value = 0.5;
+    master.connect(audioCtx.destination);
+    // [frequency, start offset, duration] — C5, E5, G5, then a longer C6
+    const notes = [
+      [523.25, 0.00, 0.16],
+      [659.25, 0.14, 0.16],
+      [783.99, 0.28, 0.16],
+      [1046.50, 0.42, 0.55],
+    ];
+    for (const [freq, dt, dur] of notes) {
+      const t = t0 + dt;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.4, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(t);
+      osc.stop(t + dur + 0.05);
+    }
+  } catch {}
 }
 
 // ---- Theme ----
@@ -890,27 +928,38 @@ function celebrate() {
     .map(v => cs.getPropertyValue(v).trim())
     .concat(["#E8DCC0"]);
 
-  const ps = Array.from({ length: 140 }, () => ({
-    x: W / 2 + (Math.random() - 0.5) * 80,
-    y: H * 0.35,
-    vx: (Math.random() - 0.5) * 13,
-    vy: -(6 + Math.random() * 9),
-    w: 5 + Math.random() * 5,
-    h: 8 + Math.random() * 6,
-    r: Math.random() * Math.PI,
-    vr: (Math.random() - 0.5) * 0.3,
-    c: colors[Math.random() * colors.length | 0],
-    o: 1,
-  }));
+  // Two cannons in the bottom corners, firing up and across the screen.
+  const ps = [];
+  for (const side of [1, -1]) {
+    const x0 = side === 1 ? -10 : W + 10;
+    for (let i = 0; i < 110; i++) {
+      const speed = 14 + Math.random() * 12;
+      const angle = -(28 + Math.random() * 34) * Math.PI / 180;  // 28°–62° above horizontal
+      ps.push({
+        x: x0,
+        y: H * (0.72 + Math.random() * 0.1),
+        vx: side * Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        w: 5 + Math.random() * 5,
+        h: 8 + Math.random() * 7,
+        r: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.4,
+        c: colors[Math.random() * colors.length | 0],
+        o: 1,
+        delay: Math.random() * 12,   // stagger so the burst feels alive
+      });
+    }
+  }
 
   let frame = 0;
   (function tick() {
     ctx.clearRect(0, 0, W, H);
     let alive = false;
     for (const p of ps) {
-      p.vy += 0.32; p.vx *= 0.99;
+      if (frame < p.delay) { alive = true; continue; }
+      p.vy += 0.26; p.vx *= 0.985; p.vy *= 0.995;
       p.x += p.vx; p.y += p.vy; p.r += p.vr;
-      if (frame > 70) p.o -= 0.02;
+      if (frame > 110) p.o -= 0.018;
       if (p.o <= 0 || p.y > H + 40) continue;
       alive = true;
       ctx.save();
@@ -922,7 +971,7 @@ function celebrate() {
       ctx.restore();
     }
     frame++;
-    if (alive && frame < 260) requestAnimationFrame(tick);
+    if (alive && frame < 320) requestAnimationFrame(tick);
     else cv.remove();
   })();
 }
