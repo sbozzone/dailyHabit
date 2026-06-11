@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Daily Disciplines" />
-  <meta name="theme-color" content="#A07830" />
+  <meta name="theme-color" content="#FAF8F5" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
@@ -17,16 +17,74 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      color-scheme: light;
+      --bg: #FAF8F5;
+      --surface: #FFFFFF;
+      --border: #EAE6DF;
+      --border-soft: #E4E0D8;
+      --text: #1C1A17;
+      --text-2: #5F5648;
+      --muted: #6E6453;
+      --faint: #8B8273;
+      --track: #E8E4DE;
+      --bar-track: #EDE9E3;
+      --bar-empty: #D8D4CC;
+      --cb-border: #C8C2B8;
+      --danger: #C0473F;
+      --c-spiritual: #A07830;
+      --c-body: #3A7D5E;
+      --c-mind: #4A6096;
+      --t-spiritual: #FDF6E8;
+      --t-body: #EDF7F2;
+      --t-mind: #EEF1F9;
+      --heat-0: #EDE9E3;
+      --heat-1: #E5D6B6;
+      --heat-2: #D4BA82;
+      --heat-3: #BE9A52;
+      --heat-4: #A07830;
+      --glow: rgba(160, 120, 48, 0.16);
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #16130F;
+      --surface: #211C16;
+      --border: #322B21;
+      --border-soft: #3A332A;
+      --text: #EDE6D9;
+      --text-2: #B7AC9A;
+      --muted: #9C9180;
+      --faint: #7E7563;
+      --track: #322C23;
+      --bar-track: #2A251D;
+      --bar-empty: #3B3327;
+      --cb-border: #564F3E;
+      --danger: #E06B61;
+      --c-spiritual: #C9A256;
+      --c-body: #69B08C;
+      --c-mind: #8CA2D0;
+      --t-spiritual: rgba(201, 162, 86, 0.09);
+      --t-body: rgba(105, 176, 140, 0.09);
+      --t-mind: rgba(140, 162, 208, 0.09);
+      --heat-0: #2A251D;
+      --heat-1: #483B25;
+      --heat-2: #6D582F;
+      --heat-3: #997B3F;
+      --heat-4: #C9A256;
+      --glow: rgba(201, 162, 86, 0.14);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       min-height: 100vh;
-      background: #FAF8F5;
-      color: #1C1A17;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Cormorant Garamond', Georgia, serif;
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: background 0.35s ease, color 0.35s ease;
     }
 
     #app {
@@ -36,38 +94,80 @@
       padding: calc(52px + env(safe-area-inset-top)) 22px calc(80px + env(safe-area-inset-bottom));
     }
 
+    /* Entrance animation — plays once the splash is dismissed */
+    .fx { opacity: 0; }
+    body.ready .fx { animation: rise 0.55s cubic-bezier(0.22, 0.8, 0.36, 1) both; }
+    body.ready .fx-1 { animation-delay: 0.06s; }
+    body.ready .fx-2 { animation-delay: 0.14s; }
+    body.ready .fx-3 { animation-delay: 0.22s; }
+    body.ready .fx-4 { animation-delay: 0.30s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fx { opacity: 1; animation: none !important; }
+      * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+
     /* Header */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
     .date-label {
       font-family: 'Courier Prime', monospace;
       font-size: 12px;
       letter-spacing: 0.2em;
-      color: #6E6453;
+      color: var(--muted);
       text-transform: uppercase;
-      margin-bottom: 8px;
     }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border-soft);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 15px;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .theme-toggle:active { transform: scale(0.9); }
     h1 {
       font-family: 'Cormorant Garamond', serif;
       font-size: 40px;
       font-weight: 300;
       line-height: 1.1;
-      color: #1C1A17;
+      color: var(--text);
     }
     .subtitle {
       font-family: 'Cormorant Garamond', serif;
       font-size: 16px;
       font-style: italic;
-      color: #5F5648;
+      color: var(--text-2);
       margin-top: 6px;
     }
 
     /* Progress card */
     .progress-card {
       margin: 28px 0 26px;
-      background: #FFFFFF;
+      background: var(--surface);
       border-radius: 12px;
       padding: 16px 18px;
-      border: 1px solid #EAE6DF;
+      border: 1px solid var(--border);
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: border-color 0.4s, box-shadow 0.4s, background 0.35s;
+    }
+    .progress-card.complete {
+      border-color: var(--c-spiritual);
+      box-shadow: 0 0 0 1px var(--glow), 0 4px 20px var(--glow);
     }
     .progress-header {
       display: flex;
@@ -79,64 +179,85 @@
       font-family: 'Courier Prime', monospace;
       font-size: 12px;
       letter-spacing: 0.15em;
-      color: #6E6453;
+      color: var(--muted);
       text-transform: uppercase;
     }
     .progress-count {
       font-family: 'Cormorant Garamond', serif;
       font-size: 24px;
       font-weight: 600;
-      color: #1C1A17;
+      color: var(--text);
     }
     .progress-count span {
-      color: #8B8273;
+      color: var(--faint);
       font-size: 16px;
       font-weight: 300;
     }
     .progress-bar {
       height: 4px;
-      background: #E8E4DE;
+      background: var(--track);
       border-radius: 2px;
       overflow: hidden;
     }
     .progress-fill {
       height: 100%;
       border-radius: 2px;
-      background: linear-gradient(90deg, #A07830, #4A6096);
+      background: linear-gradient(90deg, var(--c-spiritual), var(--c-mind));
       transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
     }
+    .progress-fill.full {
+      background: linear-gradient(90deg, var(--c-spiritual), var(--c-mind), var(--c-body), var(--c-spiritual));
+      background-size: 300% 100%;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: -300% 0; } }
     .streak {
       margin-top: 10px;
       font-family: 'Courier Prime', monospace;
       font-size: 13px;
-      color: #A07830;
+      color: var(--c-spiritual);
       letter-spacing: 0.1em;
     }
 
     /* Tabs */
     .tabs {
       display: flex;
-      border-bottom: 1px solid #E4E0D8;
+      border-bottom: 1px solid var(--border-soft);
       gap: 4px;
       margin-bottom: 24px;
     }
     .tab {
+      position: relative;
       background: none;
       border: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      color: #6E6453;
+      color: var(--muted);
       font-family: 'Courier Prime', monospace;
       font-size: 13px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       cursor: pointer;
-      padding: 6px 14px;
+      padding: 6px 12px;
       transition: color 0.2s;
     }
-    .tab.active {
-      color: #1C1A17;
-      border-bottom-color: #A07830;
+    .tab::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: -1px;
+      height: 2px;
+      background: var(--c-spiritual);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s cubic-bezier(0.22, 0.8, 0.36, 1);
+    }
+    .tab.active { color: var(--text); }
+    .tab.active::after { transform: scaleX(1); }
+
+    .view { animation: viewIn 0.3s ease both; }
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: none; }
     }
 
     /* Category cards */
@@ -170,14 +291,14 @@
       border: 1px solid transparent;
       user-select: none;
     }
-    .habit-item:active { background: rgba(0,0,0,0.05); }
+    .habit-item:active { background: rgba(128,118,98,0.12); }
     .habit-item.checked { opacity: 0.6; }
 
     .checkbox {
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      border: 1.5px solid #C8C2B8;
+      border: 1.5px solid var(--cb-border);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -187,18 +308,36 @@
       color: #fff;
       font-weight: 700;
     }
+    [data-theme="dark"] .checkbox { color: #16130F; }
+    .habit-item.just .checkbox { animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes pop {
+      0%   { transform: scale(0.7); }
+      55%  { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
     .habit-label {
+      position: relative;
       font-family: 'Cormorant Garamond', serif;
       font-size: 19px;
       font-weight: 500;
-      color: #1C1A17;
+      color: var(--text);
       transition: all 0.2s;
     }
-    .habit-item.checked .habit-label {
-      text-decoration: line-through;
-      text-decoration-color: #B0A898;
-      font-weight: 400;
+    .habit-label::after {
+      content: "";
+      position: absolute;
+      left: -2px;
+      right: -2px;
+      top: 55%;
+      height: 1.5px;
+      background: var(--faint);
+      transform: scaleX(0);
+      transform-origin: left;
     }
+    .habit-item.checked .habit-label { font-weight: 400; }
+    .habit-item.checked .habit-label::after { transform: scaleX(1); }
+    .habit-item.just.checked .habit-label::after { animation: strike 0.35s ease both; }
+    @keyframes strike { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
     /* Week view */
     .week-bars {
@@ -217,13 +356,13 @@
     .bar-count {
       font-family: 'Courier Prime', monospace;
       font-size: 12px;
-      color: #6E6453;
+      color: var(--muted);
     }
-    .bar-count.today { color: #A07830; }
+    .bar-count.today { color: var(--c-spiritual); }
     .bar-wrap {
       width: 28px;
       height: 80px;
-      background: #EDE9E3;
+      background: var(--bar-track);
       border-radius: 14px;
       display: flex;
       align-items: flex-end;
@@ -237,45 +376,166 @@
     .bar-day {
       font-family: 'Courier Prime', monospace;
       font-size: 13px;
-      color: #6E6453;
+      color: var(--muted);
     }
-    .bar-day.today { color: #1C1A17; font-weight: 700; }
+    .bar-day.today { color: var(--text); font-weight: 700; }
 
     .week-summary {
       margin-top: 24px;
-      background: #FFFFFF;
+      background: var(--surface);
       border-radius: 10px;
-      border: 1px solid #EAE6DF;
+      border: 1px solid var(--border);
       overflow: hidden;
     }
-    .summary-row {
+    .summary-cat {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 13px 16px;
-      border-bottom: 1px solid #EAE6DF;
+      padding: 13px 16px 8px;
     }
-    .summary-row:last-child { border-bottom: none; }
-    .summary-name {
+    .summary-cat-name {
       display: flex;
       gap: 8px;
       align-items: center;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      color: #1C1A17;
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
     }
     .summary-pct {
       font-family: 'Courier Prime', monospace;
       font-size: 13px;
     }
+    .summary-habit {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 16px;
+    }
+    .summary-habit:last-of-type { padding-bottom: 13px; }
+    .summary-habit + .summary-cat { border-top: 1px solid var(--border); }
+    .summary-habit-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 10px;
+    }
+    .dots { display: flex; gap: 5px; flex-shrink: 0; }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--track);
+    }
+    .dot.today-ring { box-shadow: 0 0 0 1.5px var(--faint); }
 
+    /* Journey view */
+    .journey-title {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 4px 0 12px;
+    }
+    .heatmap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .heatmap {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(7, 1fr);
+      gap: 3px;
+      justify-content: center;
+    }
+    .heat-cell {
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      background: var(--heat-0);
+    }
+    .heat-cell.future { visibility: hidden; }
+    .heat-cell.today-cell { box-shadow: inset 0 0 0 1.5px var(--faint); }
+    .heat-legend {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-top: 12px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.08em;
+    }
+    .heat-legend .heat-cell { width: 11px; height: 11px; border-radius: 3px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 14px 13px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--text);
+    }
+    .stat-num em {
+      font-style: normal;
+      font-size: 17px;
+      color: var(--faint);
+      font-weight: 300;
+    }
+    .stat-label {
+      margin-top: 7px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .journey-since {
+      margin-top: 16px;
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--faint);
+    }
+
+    /* Footer quote */
     .footer {
       margin-top: 48px;
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
-      font-size: 14px;
-      color: #8B8273;
+      font-size: 15px;
+      color: var(--faint);
       text-align: center;
+      line-height: 1.5;
+      padding: 0 10px;
+    }
+    .quote-author {
+      margin-top: 4px;
+      font-size: 13px;
+      font-style: normal;
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 0.1em;
+      color: var(--faint);
     }
 
     /* Edit mode */
@@ -291,12 +551,12 @@
       font-size: 12px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #6E6453;
+      color: var(--muted);
       cursor: pointer;
       padding: 6px 6px;
       transition: color 0.2s;
     }
-    .edit-toggle.active { color: #A07830; }
+    .edit-toggle.active { color: var(--c-spiritual); }
 
     .habit-edit {
       display: flex;
@@ -309,15 +569,15 @@
       min-width: 0;
       font-family: 'Cormorant Garamond', serif;
       font-size: 19px;
-      color: #1C1A17;
-      background: #FFFFFF;
-      border: 1px solid #E4E0D8;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
       border-radius: 8px;
       padding: 8px 12px;
       outline: none;
       transition: border-color 0.2s;
     }
-    .habit-input:focus { border-color: #8B8273; }
+    .habit-input:focus { border-color: var(--faint); }
     .habit-delete {
       flex-shrink: 0;
       width: 30px;
@@ -325,7 +585,7 @@
       border-radius: 50%;
       border: none;
       background: none;
-      color: #C0473F;
+      color: var(--danger);
       font-size: 16px;
       cursor: pointer;
       display: flex;
@@ -342,29 +602,68 @@
       width: calc(100% - 16px);
       margin: 6px 8px 2px;
       padding: 9px 12px;
-      border: 1px dashed #D8D2C8;
+      border: 1px dashed var(--cb-border);
       border-radius: 8px;
       background: none;
       cursor: pointer;
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 16px;
-      color: #5F5648;
+      color: var(--text-2);
       transition: border-color 0.2s, color 0.2s;
     }
-    .add-habit:active { border-color: #B8B0A0; color: #6C6250; }
+    .add-habit:active { border-color: var(--faint); color: var(--muted); }
+
+    .backup-card {
+      margin-top: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .backup-title {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .backup-row { display: flex; gap: 10px; }
+    .backup-btn {
+      flex: 1;
+      background: none;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      padding: 9px 6px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .backup-btn:active { border-color: var(--faint); color: var(--text); }
 
     .empty-state {
       text-align: center;
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 16px;
-      color: #6E6453;
+      color: var(--muted);
       padding: 28px 0 8px;
       line-height: 1.6;
     }
 
     .hidden { display: none; }
+
+    /* Confetti canvas (created on a perfect day) */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      pointer-events: none;
+    }
 
     /* Splash screen — full-bleed launch image, tap anywhere to dismiss */
     #splash {
@@ -404,6 +703,16 @@
     }
     @keyframes splashPulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.8; } }
   </style>
+  <script>
+    // Apply the saved (or system) theme before first paint to avoid a flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 <div id="splash" role="button" tabindex="0" aria-label="Daily Better — Small Habits, Big Change. Tap to begin.">
@@ -411,11 +720,14 @@
   <div class="splash-hint">Tap anywhere to begin</div>
 </div>
 <div id="app">
-  <div class="date-label" id="dateLabel"></div>
-  <h1>Daily Disciplines</h1>
-  <div class="subtitle" id="subtitle"></div>
+  <div class="header-row fx">
+    <div class="date-label" id="dateLabel"></div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Switch theme">☾</button>
+  </div>
+  <h1 class="fx">Daily Disciplines</h1>
+  <div class="subtitle fx fx-1" id="subtitle"></div>
 
-  <div class="progress-card">
+  <div class="progress-card fx fx-2" id="progressCard">
     <div class="progress-header">
       <span class="progress-label">Today's Progress</span>
       <span class="progress-count" id="progressCount"></span>
@@ -424,24 +736,31 @@
     <div class="streak hidden" id="streakEl"></div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs fx fx-3">
     <button class="tab active" id="tabToday" onclick="setView('today')">Today</button>
-    <button class="tab" id="tabWeek" onclick="setView('week')">This Week</button>
+    <button class="tab" id="tabWeek" onclick="setView('week')">Week</button>
+    <button class="tab" id="tabJourney" onclick="setView('journey')">Journey</button>
   </div>
 
-  <div id="viewToday"></div>
-  <div id="viewWeek" class="hidden"></div>
+  <div id="viewToday" class="view fx fx-4"></div>
+  <div id="viewWeek" class="view hidden"></div>
+  <div id="viewJourney" class="view hidden"></div>
 
-  <div class="footer">Small disciplines, compounded daily.</div>
+  <div class="footer fx fx-4" id="footer"></div>
 </div>
 
+<input type="file" id="importFile" accept="application/json,.json" class="hidden" onchange="importData(event)" />
+
 <script>
-// Categories are fixed (label, icon, color). Habits live inside them and are editable.
+// Categories are fixed (label, icon). Colors come from CSS variables so they
+// adapt to light/dark themes. Habits live inside categories and are editable.
 const CATEGORIES = [
-  { id: "spiritual", label: "Spiritual", icon: "✦", color: "#A07830", bg: "#FDF6E8" },
-  { id: "body",      label: "Body",      icon: "◈", color: "#3A7D5E", bg: "#EDF7F2" },
-  { id: "mind",      label: "Mind",      icon: "◎", color: "#4A6096", bg: "#EEF1F9" },
+  { id: "spiritual", label: "Spiritual", icon: "✦" },
+  { id: "body",      label: "Body",      icon: "◈" },
+  { id: "mind",      label: "Mind",      icon: "◎" },
 ];
+function catColor(cat) { return `var(--c-${cat.id})`; }
+function catTint(cat)  { return `var(--t-${cat.id})`; }
 
 // Seed habit set, used only the first time the app runs (before any edits).
 const DEFAULT_HABITS = [
@@ -452,6 +771,23 @@ const DEFAULT_HABITS = [
   { id: "think",      label: "Think & Reflect",  cat: "mind"      },
   { id: "journal",    label: "Journal",          cat: "mind"      },
   { id: "read",       label: "Read a Book",      cat: "mind"      },
+];
+
+const QUOTES = [
+  { t: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", a: "Will Durant" },
+  { t: "A journey of a thousand miles begins with a single step.", a: "Lao Tzu" },
+  { t: "How we spend our days is, of course, how we spend our lives.", a: "Annie Dillard" },
+  { t: "Little by little, a little becomes a lot.", a: "Tanzanian proverb" },
+  { t: "Discipline is choosing between what you want now and what you want most.", a: "" },
+  { t: "The chains of habit are too light to be felt until they are too heavy to be broken.", a: "Samuel Johnson" },
+  { t: "Motivation gets you going; habit gets you there.", a: "Zig Ziglar" },
+  { t: "Every action you take is a vote for the person you wish to become.", a: "James Clear" },
+  { t: "Sow a habit, reap a character; sow a character, reap a destiny.", a: "" },
+  { t: "Rivers carve canyons one day at a time.", a: "" },
+  { t: "It is not what we do once that shapes us, but what we do daily.", a: "" },
+  { t: "Do the next right thing.", a: "" },
+  { t: "Small disciplines repeated with consistency lead to great achievements.", a: "John C. Maxwell" },
+  { t: "The best time to plant a tree was twenty years ago. The second best time is now.", a: "Proverb" },
 ];
 
 function loadHabits() {
@@ -495,14 +831,100 @@ function saveData(d) {
 }
 
 let data = loadData();
+let lastToggledId = null;   // gets the pop/strike animation on the next render
 
 function toggle(id) {
   if (editMode) return;
   const key = getTodayKey();
   data[key] = data[key] || {};
+  const wasDone = habits.length > 0 && habits.every(h => data[key][h.id]);
   data[key][id] = !data[key][id];
   saveData(data);
+  lastToggledId = id;
+  if (data[key][id] && navigator.vibrate) navigator.vibrate(10);
   render();
+  const nowDone = habits.length > 0 && habits.every(h => data[key][h.id]);
+  if (nowDone && !wasDone) {
+    if (navigator.vibrate) navigator.vibrate([20, 60, 30]);
+    celebrate();
+  }
+}
+
+// ---- Theme ----
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.getElementById("themeToggle").textContent = t === "dark" ? "☀" : "☾";
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", t === "dark" ? "#16130F" : "#FAF8F5");
+}
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.setItem("theme", next); } catch {}
+  applyTheme(next);
+}
+if (window.matchMedia) {
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+    // Follow the system only if the user hasn't picked a theme explicitly.
+    let stored = null;
+    try { stored = localStorage.getItem("theme"); } catch {}
+    if (!stored) applyTheme(e.matches ? "dark" : "light");
+  });
+}
+
+// ---- Celebration ----
+function celebrate() {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (document.getElementById("confetti")) return;
+  const cv = document.createElement("canvas");
+  cv.id = "confetti";
+  document.body.appendChild(cv);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = window.innerWidth, H = window.innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext("2d");
+  if (!ctx) { cv.remove(); return; }
+  ctx.scale(dpr, dpr);
+
+  const cs = getComputedStyle(document.documentElement);
+  const colors = ["--c-spiritual", "--c-body", "--c-mind"]
+    .map(v => cs.getPropertyValue(v).trim())
+    .concat(["#E8DCC0"]);
+
+  const ps = Array.from({ length: 140 }, () => ({
+    x: W / 2 + (Math.random() - 0.5) * 80,
+    y: H * 0.35,
+    vx: (Math.random() - 0.5) * 13,
+    vy: -(6 + Math.random() * 9),
+    w: 5 + Math.random() * 5,
+    h: 8 + Math.random() * 6,
+    r: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.3,
+    c: colors[Math.random() * colors.length | 0],
+    o: 1,
+  }));
+
+  let frame = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, W, H);
+    let alive = false;
+    for (const p of ps) {
+      p.vy += 0.32; p.vx *= 0.99;
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (frame > 70) p.o -= 0.02;
+      if (p.o <= 0 || p.y > H + 40) continue;
+      alive = true;
+      ctx.save();
+      ctx.globalAlpha = Math.max(p.o, 0);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    frame++;
+    if (alive && frame < 260) requestAnimationFrame(tick);
+    else cv.remove();
+  })();
 }
 
 // ---- Habit editing ----
@@ -551,12 +973,94 @@ function deleteHabit(id) {
   render();
 }
 
+// ---- Backup ----
+function exportData() {
+  const payload = {
+    app: "daily-disciplines",
+    exportedAt: new Date().toISOString(),
+    habitConfig: habits,
+    habitData: data,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "daily-disciplines-backup-" + getTodayKey() + ".json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function importData(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const p = JSON.parse(reader.result);
+      const cfg = Array.isArray(p.habitConfig) ? p.habitConfig : null;
+      const dat = (p.habitData && typeof p.habitData === "object" && !Array.isArray(p.habitData)) ? p.habitData : null;
+      if (!cfg && !dat) throw new Error("not a backup");
+      const when = p.exportedAt ? " from " + String(p.exportedAt).slice(0, 10) : "";
+      if (!confirm("Replace your current habits and history with this backup" + when + "?")) {
+        ev.target.value = "";
+        return;
+      }
+      if (cfg) {
+        habits = cfg
+          .filter(h => h && h.id && CATEGORIES.some(c => c.id === h.cat))
+          .map(h => ({ id: String(h.id), label: String(h.label || ""), cat: h.cat }));
+        saveHabits();
+      }
+      if (dat) { data = dat; saveData(data); }
+      render();
+    } catch {
+      alert("That file doesn't look like a Daily Disciplines backup.");
+    }
+    ev.target.value = "";
+  };
+  reader.readAsText(file);
+}
+
+// ---- Views ----
 function setView(v) {
-  if (v === "week" && editMode) setEdit(false);  // leave edit mode when switching away
-  document.getElementById("tabToday").className = "tab" + (v === "today" ? " active" : "");
-  document.getElementById("tabWeek").className  = "tab" + (v === "week"  ? " active" : "");
-  document.getElementById("viewToday").className = v === "today" ? "" : "hidden";
-  document.getElementById("viewWeek").className  = v === "week"  ? "" : "hidden";
+  if (v !== "today" && editMode) setEdit(false);  // leave edit mode when switching away
+  document.getElementById("tabToday").className   = "tab" + (v === "today"   ? " active" : "");
+  document.getElementById("tabWeek").className    = "tab" + (v === "week"    ? " active" : "");
+  document.getElementById("tabJourney").className = "tab" + (v === "journey" ? " active" : "");
+  for (const [id, name] of [["viewToday", "today"], ["viewWeek", "week"], ["viewJourney", "journey"]]) {
+    const el = document.getElementById(id);
+    const show = name === v;
+    el.className = show ? "view" : "view hidden";
+    if (show) {  // restart the entrance animation
+      el.style.animation = "none";
+      void el.offsetWidth;
+      el.style.animation = "";
+    }
+  }
+}
+
+// All-time stats from the stored history.
+function computeStats(ids) {
+  const keys = Object.keys(data).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort();
+  let perfect = 0, checkins = 0, best = 0;
+  for (const k of keys) {
+    const dd = data[k] || {};
+    for (const id in dd) if (dd[id]) checkins++;
+    if (ids.length > 0 && ids.every(id => dd[id])) perfect++;
+  }
+  if (keys.length && ids.length) {
+    const todayKey = getTodayKey();
+    const d = new Date(keys[0] + "T00:00:00");
+    let run = 0;
+    for (let i = 0; i < 3700; i++) {
+      const k = dateKey(d);
+      const dd = data[k] || {};
+      if (ids.every(id => dd[id])) { run++; if (run > best) best = run; }
+      else run = 0;
+      if (k === todayKey) break;
+      d.setDate(d.getDate() + 1);
+    }
+  }
+  return { perfect, checkins, best, firstKey: keys[0] || null };
 }
 
 function render() {
@@ -570,12 +1074,18 @@ function render() {
     new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   document.getElementById("subtitle").textContent =
-    done === 0    ? "Let's get started."
+    total === 0   ? "Add a habit to begin."
+    : done === 0  ? "Let's get started."
     : done < total ? "Keep going, you're doing great."
-    :                "Every habit complete today. 🎉";
+    :               "Every habit complete today. 🎉";
 
   document.getElementById("progressCount").innerHTML = done + '<span>/' + total + '</span>';
-  document.getElementById("progressFill").style.width = (total > 0 ? (done / total) * 100 : 0) + "%";
+  const allDone = total > 0 && done === total;
+  const fill = document.getElementById("progressFill");
+  fill.style.width = (total > 0 ? (done / total) * 100 : 0) + "%";
+  fill.className = allDone ? "progress-fill full" : "progress-fill";
+  document.getElementById("progressCard").className =
+    "progress-card fx fx-2" + (allDone ? " complete" : "");
 
   // Streak — today partial does not break streak
   let streak = 0;
@@ -601,12 +1111,12 @@ function render() {
 
   let bodyHtml;
   if (editMode) {
-    // Edit mode: rename fields, delete buttons, and an add row per category.
+    // Edit mode: rename fields, delete buttons, an add row per category, and backup tools.
     bodyHtml = CATEGORIES.map(cat => `
-      <div class="category-card" style="background:${cat.bg}">
+      <div class="category-card" style="background:${catTint(cat)}">
         <div class="category-header">
-          <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
-          <span class="category-label" style="color:${cat.color}">${cat.label}</span>
+          <span style="color:${catColor(cat)};font-size:13px">${cat.icon}</span>
+          <span class="category-label" style="color:${catColor(cat)}">${cat.label}</span>
         </div>
         ${habits.filter(h => h.cat === cat.id).map(item => `
           <div class="habit-edit">
@@ -616,27 +1126,35 @@ function render() {
             <button class="habit-delete" onclick="deleteHabit('${item.id}')" aria-label="Delete habit">✕</button>
           </div>`).join('')}
         <button class="add-habit" onclick="addHabit('${cat.id}')">
-          <span style="color:${cat.color};font-style:normal;font-weight:700">+</span> Add a habit
+          <span style="color:${catColor(cat)};font-style:normal;font-weight:700">+</span> Add a habit
         </button>
-      </div>`).join('');
+      </div>`).join('') + `
+      <div class="backup-card">
+        <div class="backup-title">Your Data</div>
+        <div class="backup-row">
+          <button class="backup-btn" onclick="exportData()">↓ Export backup</button>
+          <button class="backup-btn" onclick="document.getElementById('importFile').click()">↑ Import backup</button>
+        </div>
+      </div>`;
   } else {
     // Normal mode: tap-to-toggle. Empty categories are hidden.
     const visibleCats = CATEGORIES.filter(cat => habits.some(h => h.cat === cat.id));
     bodyHtml = visibleCats.length === 0
       ? '<div class="empty-state">No habits yet.<br>Tap <b>✎ Edit</b> to add some.</div>'
       : visibleCats.map(cat => `
-        <div class="category-card" style="background:${cat.bg}">
+        <div class="category-card" style="background:${catTint(cat)}">
           <div class="category-header">
-            <span style="color:${cat.color};font-size:13px">${cat.icon}</span>
-            <span class="category-label" style="color:${cat.color}">${cat.label}</span>
+            <span style="color:${catColor(cat)};font-size:13px">${cat.icon}</span>
+            <span class="category-label" style="color:${catColor(cat)}">${cat.label}</span>
           </div>
           ${habits.filter(h => h.cat === cat.id).map(item => {
             const checked = !!todayChecked[item.id];
+            const just = item.id === lastToggledId ? ' just' : '';
             return `
-              <div class="habit-item${checked ? ' checked' : ''}" onclick="toggle('${item.id}')">
+              <div class="habit-item${checked ? ' checked' : ''}${just}" onclick="toggle('${item.id}')">
                 <div class="checkbox" style="${checked
-                  ? `background:${cat.color};border-color:${cat.color}`
-                  : `border-color:${cat.color}60`}">${checked ? '✓' : ''}</div>
+                  ? `background:${catColor(cat)};border-color:${catColor(cat)}`
+                  : `border-color:color-mix(in srgb, ${catColor(cat)} 45%, transparent)`}">${checked ? '✓' : ''}</div>
                 <span class="habit-label">${escapeHtml(item.label)}</span>
               </div>`;
           }).join('')}
@@ -644,6 +1162,7 @@ function render() {
   }
 
   document.getElementById("viewToday").innerHTML = editBar + bodyHtml;
+  lastToggledId = null;
 
   // After adding a habit, focus its (empty) name field.
   if (focusId) {
@@ -665,7 +1184,8 @@ function render() {
   const barsHtml = weekDays.map(day => {
     const pct   = day.total > 0 ? day.done / day.total : 0;
     const h     = Math.round(pct * 80);
-    const color = pct === 1 ? "#A07830" : pct > 0.5 ? "#3A7D5E" : pct > 0 ? "#4A6096" : "#D8D4CC";
+    const color = pct === 1 ? "var(--c-spiritual)" : pct > 0.5 ? "var(--c-body)"
+                : pct > 0 ? "var(--c-mind)" : "var(--bar-empty)";
     return `
       <div class="week-bar">
         <div class="bar-count${day.isToday ? ' today' : ''}">${day.done}/${day.total}</div>
@@ -674,22 +1194,85 @@ function render() {
       </div>`;
   }).join('');
 
+  // Weekly summary: a % per category, then a 7-dot strip per habit.
   const summaryHtml = CATEGORIES.map(cat => {
     const items = habits.filter(h => h.cat === cat.id);
     if (items.length === 0) return '';
     const wd  = weekDays.reduce((acc, day) => acc + items.filter(it => (data[day.key]||{})[it.id]).length, 0);
     const pct = Math.round((wd / (items.length * 7)) * 100);
+    const rows = items.map(it => {
+      const dots = weekDays.map(day => {
+        const on = !!(data[day.key] || {})[it.id];
+        const ring = day.isToday ? ' today-ring' : '';
+        return `<span class="dot${ring}" style="${on ? `background:${catColor(cat)}` : ''}"></span>`;
+      }).join('');
+      return `
+        <div class="summary-habit">
+          <span class="summary-habit-name">${escapeHtml(it.label)}</span>
+          <span class="dots">${dots}</span>
+        </div>`;
+    }).join('');
     return `
-      <div class="summary-row">
-        <div class="summary-name"><span style="color:${cat.color}">${cat.icon}</span>${cat.label}</div>
-        <span class="summary-pct" style="color:${cat.color}">${pct}%</span>
-      </div>`;
+      <div class="summary-cat">
+        <div class="summary-cat-name" style="color:${catColor(cat)}"><span>${cat.icon}</span>${cat.label}</div>
+        <span class="summary-pct" style="color:${catColor(cat)}">${pct}%</span>
+      </div>${rows}`;
   }).join('');
 
   document.getElementById("viewWeek").innerHTML =
     `<div class="week-bars">${barsHtml}</div><div class="week-summary">${summaryHtml}</div>`;
+
+  // Journey view — 12-week heatmap + all-time stats
+  const stats = computeStats(ALL_IDS);
+  const WEEKS = 12;
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(start.getDate() - today.getDay() - 7 * (WEEKS - 1));  // Sunday, WEEKS-1 weeks back
+  let cells = '';
+  const cur = new Date(start);
+  for (let i = 0; i < WEEKS * 7; i++) {
+    const key = dateKey(cur);
+    if (cur > today && key !== todayKey) {
+      cells += '<span class="heat-cell future"></span>';
+    } else {
+      const dd  = data[key] || {};
+      const pct = total > 0 ? ALL_IDS.filter(id => dd[id]).length / total : 0;
+      const lvl = pct === 0 ? 0 : Math.min(4, Math.ceil(pct * 4));
+      const isToday = key === todayKey ? ' today-cell' : '';
+      cells += `<span class="heat-cell${isToday}" style="background:var(--heat-${lvl})"></span>`;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  const legend = [0,1,2,3,4].map(l => `<span class="heat-cell" style="background:var(--heat-${l})"></span>`).join('');
+  const sinceHtml = stats.firstKey
+    ? `<div class="journey-since">Tracking since ${new Date(stats.firstKey + "T00:00:00")
+        .toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.</div>`
+    : '<div class="journey-since">Your story starts today.</div>';
+
+  document.getElementById("viewJourney").innerHTML = `
+    <div class="journey-title">Last ${WEEKS} Weeks</div>
+    <div class="heatmap-card">
+      <div class="heatmap">${cells}</div>
+      <div class="heat-legend">less&nbsp;${legend}&nbsp;more</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">${streak}<em> day${streak === 1 ? '' : 's'}</em></div><div class="stat-label">Current Streak</div></div>
+      <div class="stat"><div class="stat-num">${stats.best}<em> day${stats.best === 1 ? '' : 's'}</em></div><div class="stat-label">Best Streak</div></div>
+      <div class="stat"><div class="stat-num">${stats.perfect}</div><div class="stat-label">Perfect Days</div></div>
+      <div class="stat"><div class="stat-num">${stats.checkins}</div><div class="stat-label">Check-ins</div></div>
+    </div>
+    ${sinceHtml}`;
+
+  // Quote of the day
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 864e5);
+  const q = QUOTES[dayOfYear % QUOTES.length];
+  document.getElementById("footer").innerHTML =
+    '“' + escapeHtml(q.t) + '”' +
+    (q.a ? '<div class="quote-author">— ' + escapeHtml(q.a) + '</div>' : '');
 }
 
+applyTheme(document.documentElement.dataset.theme || "light");
 render();
 </script>
 
@@ -706,6 +1289,7 @@ render();
     if (!splash) return;
     function dismiss() {
       splash.classList.add('hide');
+      document.body.classList.add('ready');   // start the content entrance animation
       document.removeEventListener('pointerdown', dismiss);
       document.removeEventListener('keydown', dismiss);
       setTimeout(function () {
